@@ -1,0 +1,28 @@
+{
+  "name": "info-tech",
+  "version": "1.0.0",
+  "description": "A react app with SWC compiler and PNPM ",
+  "main": "index.js",
+  "author": "roguedev",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack serve --env mode=development",
+    "build": "webpack --env mode=production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@swc/cli": "^0.3.9",
+    "@swc/core": "^1.4.1",
+    "css-loader": "^6.10.0",
+    "html-webpack-plugin": "^5.6.0",
+    "style-loader": "^3.3.4",
+    "swc-loader": "^0.2.6",
+    "webpack": "^5.90.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.1"
+  }
+}

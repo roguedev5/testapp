@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile-dev
+    ports:
+      - ${CLIENT_PORT:-4000}:${CLIENT_PORT:-4000}
+    command: [
+      "pnpm",
+      "start"
+    ]
+    volumes:
+      - ./src:/home/node/app/src
+    env_file:
+      - ./env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - CLIENT_HOST=${CLIENT_HOST:-localhost}
+      - CLIENT_PROTOCOL=${CLIENT_PROTOCOL:-http}
+      - CLIENT_PORT=${CLIENT_PORT:-4000}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
