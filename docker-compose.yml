@@ -14,7 +14,7 @@ services:
     volumes:
       - ./src:/home/node/app/src
     env_file:
-      - ./env
+      - ./.env
     environment:
       - NODE_ENV=${NODE_ENV:-development}
       - CLIENT_HOST=${CLIENT_HOST:-localhost}
