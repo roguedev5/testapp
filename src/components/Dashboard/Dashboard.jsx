@@ -7,6 +7,7 @@ import { cards } from "../shared/cards";
 import { Paper } from "@mui/material";
 import Map from "../Map/Map";
 import ColumnGroupingTable from "../Table/Table";
+import ReportPage from "../../pages/ReportsPage";
 
 export default function Dashboard() {
   return (
@@ -38,15 +39,7 @@ export default function Dashboard() {
           </Paper>
         </Grid>
         <Grid item xs={12}>
-          <Box sx={{ display: "flex", flexDirection: "row" }}>
-            <ColumnGroupingTable />
-            <Charts />
-          </Box>
-        </Grid>
-        <Grid item xs={12}>
-          <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <ColumnGroupingTable />
-          </Paper>
+          <ReportPage />
         </Grid>
       </Grid>
     </Container>

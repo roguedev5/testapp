@@ -1,5 +1,6 @@
-import React from "react";
-import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
+import React, { useState } from "react";
+import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
+import { markers } from "../shared/markers";
 
 const containerStyle = {
   width: "100%",
@@ -7,8 +8,8 @@ const containerStyle = {
 };
 
 const center = {
-  lat: -3.745,
-  lng: -38.523,
+  lat: 12.965216,
+  lng: 2237.586456,
 };
 
 export default function Map() {
@@ -17,8 +18,7 @@ export default function Map() {
     id: "google-map-script",
     googleMapsApiKey: GOOGLE_API_KEY,
   });
-
-  const [map, setMap] = React.useState(null);
+  const [map, setMap] = useState(null);
 
   const onLoad = React.useCallback(function callback(map) {
     const bounds = new window.google.maps.LatLngBounds(center);
@@ -34,13 +34,14 @@ export default function Map() {
   return isLoaded ? (
     <GoogleMap
       mapContainerStyle={containerStyle}
-      center={center}
+      center={location}
       zoom={10}
       onLoad={onLoad}
       onUnmount={onUnmount}
     >
-      {/* Child components, such as markers, info windows, etc. */}
-      <></>
+      {markers.map((marker, index) => (
+        <Marker key={index} position={marker.position} icon={marker.icon} />
+      ))}
     </GoogleMap>
   ) : (
     <></>

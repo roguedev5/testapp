@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -7,10 +7,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
+import { Box, Button } from "@mui/material";
+import CustomSearchBar from "../shared/CustomSearch";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 
 const columns = [
-  { id: "name", label: "Name", minWidth: 170 },
   { id: "code", label: "ISO\u00a0Code", minWidth: 100 },
+  { id: "name", label: "Name", minWidth: 170 },
   {
     id: "population",
     label: "Population",
@@ -32,34 +39,57 @@ const columns = [
     align: "right",
     format: (value) => value.toFixed(2),
   },
+  {
+    id: "select",
+    label: "Select",
+    minWidth: 170,
+    align: "center",
+    type: "button",
+  },
+  {
+    id: "delete",
+    label: "Delete",
+    minWidth: 170,
+    align: "center",
+    type: "button",
+  },
 ];
 
-function createData(name, code, population, size) {
-  const density = population / size;
-  return { name, code, population, size, density };
-}
+export default function ColumnGroupingTable({
+  isActionEnabled,
+  handleSelect,
+  rows,
+  handleDelete,
+}) {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searched, setSearched] = useState("");
+  const [actionRows, setActionRows] = useState(rows);
+  const [open, setOpen] = useState({ isOpen: false, selected: "" });
 
-const rows = [
-  createData("India", "IN", 1324171354, 3287263),
-  createData("China", "CN", 1403500365, 9596961),
-  createData("Italy", "IT", 60483973, 301340),
-  createData("United States", "US", 327167434, 9833520),
-  createData("Canada", "CA", 37602103, 9984670),
-  createData("Australia", "AU", 25475400, 7692024),
-  createData("Germany", "DE", 83019200, 357578),
-  createData("Ireland", "IE", 4857000, 70273),
-  createData("Mexico", "MX", 126577691, 1972550),
-  createData("Japan", "JP", 126317000, 377973),
-  createData("France", "FR", 67022000, 640679),
-  createData("United Kingdom", "GB", 67545757, 242495),
-  createData("Russia", "RU", 146793744, 17098246),
-  createData("Nigeria", "NG", 200962417, 923768),
-  createData("Brazil", "BR", 210147125, 8515767),
-];
+  const handleClickOpen = (value) => {
+    setOpen({ isOpen: true, selected: value });
+  };
 
-export default function ColumnGroupingTable() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const handleClose = () => {
+    setOpen({ isOpen: false, selected: "" });
+  };
+
+  const requestSearch = (searchedVal) => {
+    setSearched(searchedVal);
+    if (searchedVal) {
+      const filteredRows = rows?.filter((row) => {
+        return row.name.toLowerCase().includes(searchedVal.toLowerCase());
+      });
+      setActionRows(filteredRows);
+    } else {
+      setActionRows(rows);
+    }
+  };
+
+  const cancelSearch = () => {
+    requestSearch("");
+  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -70,44 +100,119 @@ export default function ColumnGroupingTable() {
     setPage(0);
   };
 
+  const actionHandleSelect = (row, index) => {
+    if (searched) {
+      setActionRows((prevState) =>
+        prevState.map((item) =>
+          item.name === row.name
+            ? {
+                ...item,
+                isSelected: item?.isSelected ? !item.isSelected : true,
+              }
+            : item
+        )
+      );
+    }
+    handleSelect(row, index);
+  };
+
+  const actionHandleDelete = (row) => {
+    if (searched) {
+      setActionRows((prevState) =>
+        prevState.filter((item) => item.name !== open.selected.name)
+      );
+    }
+    handleDelete(open.selected);
+    handleClose();
+  };
+
   return (
-    <Paper sx={{ width: "100%" }}>
+    <Paper sx={{ width: "100%", height: "100%", overflow: "auto" }}>
+      {isActionEnabled ? (
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <CustomSearchBar onSearch={requestSearch} onClose={cancelSearch} />
+        </Box>
+      ) : null}
       <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label="sticky table">
+        <Table aria-label="sticky table">
           <TableHead>
             <TableRow>
-              <TableCell align="center" colSpan={2}>
-                Country
-              </TableCell>
-              <TableCell align="center" colSpan={3}>
-                Details
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ top: 57, minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
+              {columns.map((column) =>
+                column.type === "button" ? (
+                  isActionEnabled && (
+                    <TableCell key={column.id} align={column.align}>
+                      {column.label}
+                    </TableCell>
+                  )
+                ) : (
+                  <TableCell key={column.id} align={column.align}>
+                    {column.label}
+                  </TableCell>
+                )
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows
+            {(searched ? actionRows : rows)
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
+              .map((row, index) => {
                 return (
                   <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
                     {columns.map((column) => {
                       const value = row[column.id];
                       return (
                         <TableCell key={column.id} align={column.align}>
-                          {column.format && typeof value === "number"
-                            ? column.format(value)
-                            : value}
+                          {column?.type !== "button" ? (
+                            column.format && typeof value === "number" ? (
+                              column.format(value)
+                            ) : (
+                              value
+                            )
+                          ) : isActionEnabled ? (
+                            column.id === "select" ? (
+                              <Button
+                                size="small"
+                                color={
+                                  row?.isSelected ? "success" : "secondary"
+                                }
+                                variant="contained"
+                                onClick={() => actionHandleSelect(row, index)}
+                              >
+                                {row?.isSelected ? "Selected" : "Select"}
+                              </Button>
+                            ) : (
+                              <>
+                                <Button
+                                  size="small"
+                                  color="error"
+                                  variant="contained"
+                                  onClick={() => handleClickOpen(row)}
+                                >
+                                  Delete
+                                </Button>
+                                <Dialog
+                                  open={open.isOpen}
+                                  onClose={handleClose}
+                                  aria-describedby="alert-dialog-slide-description"
+                                >
+                                  <DialogTitle>Delete</DialogTitle>
+                                  <DialogContent>
+                                    <DialogContentText id="alert-dialog-slide-description">
+                                      Are You sure to delete this Item?
+                                    </DialogContentText>
+                                  </DialogContent>
+                                  <DialogActions>
+                                    <Button
+                                      onClick={() => actionHandleDelete(row)}
+                                    >
+                                      Yes
+                                    </Button>
+                                    <Button onClick={handleClose}>No</Button>
+                                  </DialogActions>
+                                </Dialog>
+                              </>
+                            )
+                          ) : null}
                         </TableCell>
                       );
                     })}
@@ -117,15 +222,17 @@ export default function ColumnGroupingTable() {
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+      {rows.length ? (
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 20]}
+          component="div"
+          count={rows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      ) : null}
     </Paper>
   );
 }
